@@ -30,17 +30,16 @@ function onInput(e) {
 
       if (data.length <= 10 && data.length >= 2) {
         countryList.innerHTML = '';
-
-        for (let i = 0; i < 10; i += 1) {
-          createCountryList(data[i]);
-        }
+        createCountryList(data);
+        
         return;
       }
 
-      createCountryCard(countryData);
+      countryList.innerHTML = '';
+      createCountryCard(data);
     })
     .catch(err => {
-      console.dir(err);
+      console.log(err);
       if (err.message === '404') {
         countryList.innerHTML = '';
         Notiflix.Notify.failure('Oops, there is no country with that name');
@@ -51,35 +50,40 @@ function onInput(e) {
 inputEl.addEventListener('input', debounce(onInput, DEBOUNCE_DELAY));
 
 function createCountryCard(countryData) {
-  const languages = Object.values(countryData.languages).join(', ');
-  countryList.innerHTML = `<li class="country">
+  const countryMarkup = countryData.map(({name,capital,population,flags,languages} = countryData) =>
+  `<li class="country">
           <div class="country__header">
             <img
               class="country__flag"
-              src="${countryData.flags.svg}"
+              src="${flags.svg}"
               alt="Country flag"
               height="40"
             />
-            <p class="country__name">${countryData.name.official}</p>
+            <p class="country__name">${name.official}</p>
           </div>
-          <p class="country__info"><span>Capital:</span> ${countryData.capital}</p>
-          <p class="country__info"><span>Population:</span> ${countryData.population}</p>
-          <p class="country__info"><span>Languages:</span> ${languages}</p>
-        </li>`;
+          <p class="country__info"><span>Capital:</span> ${capital}</p>
+          <p class="country__info"><span>Population:</span> ${population}</p>
+          <p class="country__info"><span>Languages:</span> ${Object.values(languages).join(', ')}</p>
+        </li>`).join('');
+  
+  return countryList.insertAdjacentHTML("beforeend", countryMarkup);
 }
 
 function createCountryList(countryData) {
-  let countryItem = `<li class="country">
+  const countryItem = countryData.map(({flags, name} = countryData) =>
+  `<li class="country">
         <div class="country__header">
             <img
                 class="country__flag"
-                src="${countryData.flags.svg}"
+                src="${flags.svg}"
                 alt="country flag"
                 width="35"
                 height="40"
             />
-            <p class="country__name--list">${countryData.name.official}</p>
+            <p class="country__name--list">${name.official}</p>
         </div>
-    </li>`;
+    </li>`
+  ).join('');
+
   countryList.insertAdjacentHTML('beforeend', countryItem);
 }
